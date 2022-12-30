@@ -12,6 +12,7 @@ type (
 		Cgroups   []string
 		Username  string
 		PID       int
+		PPID      int
 		StartTime time.Time
 	}
 

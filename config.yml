@@ -1,0 +1,8 @@
+matchers:
+  - name: nginx
+    user: root
+    cmdline: "nginx: master process"
+    ppid: 1
+  - name: "nginx: worker process"
+    user: www
+    cmdline: "nginx: worker process"

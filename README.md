@@ -11,6 +11,66 @@ Some apps are impractical to instrument directly, either because you
 don't control the code or they're written in a language that isn't easy to
 instrument with Prometheus.  We must instead resort to mining /proc.
 
+## Note
+
+When I used this repository to monitor nginx, I found that there were multiple nginx master processes, which caused false positives (possibly caused by my configuration misuse). See [process - exporter](https://github.com/ncabatoff/process-exporter/issues/253). So a few changes have been made with [ncabatoff/process-exporter](https://github.com/ncabatoff/process-exporter).
+
+- Change config format
+
+```yaml
+# matchers:
+# - name: ${groupname}
+#  comm: /proc/${pid}/comm
+#  user: ${process exec user}
+#  ppid: ${process ppid}
+#  cmdline: /proc/${pid}/cmdline
+
+# example.yml
+matchers:
+  - name: nginx
+    user: root
+    cmdline: "nginx: master process"
+    ppid: 1
+  - name: "nginx: worker process"
+    user: www
+    cmdline: "nginx: worker process"
+```
+
+- Change default boot parameters
+- - Delete `namemapping` , `procnames` flag
+  - Change `children` flag default value to `false`, and `config.path` default value to `config.yml`
+
+```bash
+./process-exporter
+Usage of ./process-exporter:
+  -children
+        if a proc is tracked, track with it any children that aren't part of their own group
+  -config.path string
+        path to YAML config file (default "config.yml")
+  -debug
+        log debugging information to stdout
+  -gather-smaps
+        gather metrics from smaps file, which contains proportional resident memory size (default true)
+  -once-to-stdout-delay duration
+        Don't bind, just wait this much time, print the metrics once to stdout, and exit
+  -procfs string
+        path to read proc data from (default "/proc")
+  -recheck
+        recheck process names on each scrape
+  -threads
+        report on per-threadname metrics as well (default true)
+  -version
+        print version information and exit
+  -web.config.file string
+        path to YAML web config file
+  -web.listen-address string
+        Address on which to expose metrics and web interface. (default ":9256")
+  -web.telemetry-path string
+        Path under which to expose metrics. (default "/metrics")
+```
+
+
+
 ## Installation
 
 Either grab a package for your OS from the [Releases][release] page, or
